@@ -1,0 +1,33 @@
+﻿@model List<BusTicketSystem.Models.Bus>
+
+@{
+    ViewData["Title"] = "Listado de Buses";
+}
+
+<h2>Listado de Buses</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Placa</th>
+            <th>Modelo</th>
+            <th>Capacidad</th>
+            <th>Pisos</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bus in Model)
+        {
+            <tr>
+                <td>@bus.IdBus</td>
+                <td>@bus.Placa</td>
+                <td>@bus.Modelo</td>
+                <td>@bus.Capacidad</td>
+                <td>@bus.Pisos</td>
+                <td>@(bus.Estado ? "Activo" : "Inactivo")</td>
+            </tr>
+        }
+    </tbody>
+</table>
