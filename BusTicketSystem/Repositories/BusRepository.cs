@@ -47,5 +47,27 @@ namespace BusTicketSystem.Repositories
 
             return lista;
         }
+
+        public void InsertarBus(Bus bus)
+        {
+            using (SqlConnection conexion = _conexionBD.ObtenerConexion())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_InsertarBus", conexion))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Placa", bus.Placa);
+                    cmd.Parameters.AddWithValue("@Modelo", bus.Modelo);
+                    cmd.Parameters.AddWithValue("@Capacidad", bus.Capacidad);
+                    cmd.Parameters.AddWithValue("@Pisos", bus.Pisos);
+                    cmd.Parameters.AddWithValue("@Estado", bus.Estado);
+
+                    conexion.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+
     }
 }

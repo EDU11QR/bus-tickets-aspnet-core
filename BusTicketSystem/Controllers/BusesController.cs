@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BusTicketSystem.Repositories;
+using BusTicketSystem.Models;
 
 namespace BusTicketSystem.Controllers
 {
@@ -17,5 +18,23 @@ namespace BusTicketSystem.Controllers
             var buses = _busRepository.ListarBuses();
             return View(buses);
         }
+
+        public IActionResult Crear()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Crear(Bus bus)
+        {
+            if (ModelState.IsValid)
+            {
+                _busRepository.InsertarBus(bus);
+                return RedirectToAction("Index");
+            }
+
+            return View(bus);
+        }
+
     }
 }
