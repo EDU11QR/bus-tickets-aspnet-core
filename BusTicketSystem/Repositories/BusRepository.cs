@@ -48,7 +48,7 @@ namespace BusTicketSystem.Repositories
             return lista;
         }
 
-        // Metodo para crear un Bus
+        // Metodo para crear un Bus //
 
         public void InsertarBus(Bus bus)
         {
