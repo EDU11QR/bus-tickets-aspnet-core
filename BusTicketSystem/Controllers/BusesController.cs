@@ -36,5 +36,30 @@ namespace BusTicketSystem.Controllers
             return View(bus);
         }
 
+        // Metodo para Editar
+        public IActionResult Editar(int id)
+        {
+            var bus = _busRepository.ObtenerBusPorId(id);
+
+            if (bus == null)
+            {
+                return NotFound();
+            }
+
+            return View(bus);
+        }
+
+        [HttpPost]
+        public IActionResult Editar(Bus bus)
+        {
+            if (ModelState.IsValid)
+            {
+                _busRepository.ActualizarBus(bus);
+                return RedirectToAction("Index");
+            }
+
+            return View(bus);
+        }
+
     }
 }
