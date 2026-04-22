@@ -1,74 +1,92 @@
 ﻿@model BusTicketSystem.ViewModels.BusPaginadoViewModel
 
 @{
-    ViewData["Title"] = "Listado de Buses";
+    ViewData["Title"] = "Buses";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 
-<h2>Listado de Buses</h2>
+<div class="card-custom">
 
-<a asp-action="Crear" class="btn btn-success mb-3">Nuevo Bus</a>
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Lista de Buses</h3>
+        <a asp-action="Crear" class="btn btn-success">+ Nuevo Bus</a>
+    </div>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Placa</th>
-            <th>Modelo</th>
-            <th>Capacidad</th>
-            <th>Pisos</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var bus in Model.Buses)
-        {
+    <table class="table table-hover">
+        <thead>
             <tr>
-                <td>@bus.IdBus</td>
-                <td>@bus.Placa</td>
-                <td>@bus.Modelo</td>
-                <td>@bus.Capacidad</td>
-                <td>@bus.Pisos</td>
-                <td>@(bus.Estado ? "Activo" : "Inactivo")</td>
-                <td>
-                    <a asp-action="Editar" asp-route-id="@bus.IdBus" class="btn btn-warning btn-sm">Editar</a>
-
-                    <form asp-action="Eliminar" asp-route-id="@bus.IdBus" method="post" class="form-eliminar d-inline">
-                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
-                </td>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Capacidad</th>
+                <th>Pisos</th>
+                <th>Estado</th>
+                <th style="width:180px;">Acciones</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
 
-<nav>
-    <ul class="pagination">
-        @if (Model.PaginaActual > 1)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual - 1)">Anterior</a>
-            </li>
-        }
+        <tbody>
+            @foreach (var bus in Model.Buses)
+            {
+                <tr>
+                    <td>@bus.Placa</td>
+                    <td>@bus.Modelo</td>
+                    <td>@bus.Capacidad</td>
+                    <td>@bus.Pisos</td>
 
-        @for (int i = 1; i <= Model.TotalPaginas; i++)
-        {
-            <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
-                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
-            </li>
-        }
+                    <td>
+                        @if (bus.Estado)
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactivo</span>
+                        }
+                    </td>
 
-        @if (Model.PaginaActual < Model.TotalPaginas)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual + 1)">Siguiente</a>
-            </li>
-        }
-    </ul>
-</nav>
+                    <td>
+                        <a asp-action="Editar" asp-route-id="@bus.IdBus"
+                           class="btn btn-warning btn-sm">✏️</a>
 
-<p>Total de registros: @Model.TotalRegistros</p>
+                        <form asp-action="Eliminar" asp-route-id="@bus.IdBus" method="post" class="d-inline form-eliminar">
+                            <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <p class="mb-0"><strong>Total de registros:</strong> @Model.TotalRegistros</p>
+
+        <nav>
+            <ul class="pagination mb-0">
+                @if (Model.PaginaActual > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual - 1)">Anterior</a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= Model.TotalPaginas; i++)
+                {
+                    <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+                    </li>
+                }
+
+                @if (Model.PaginaActual < Model.TotalPaginas)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual + 1)">Siguiente</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+
+</div>
 
 @section Scripts {
     <script>
@@ -77,7 +95,7 @@
 
             formularios.forEach(function (form) {
                 form.addEventListener("submit", function (event) {
-                    const confirmar = confirm("¿Estás seguro de eliminar este bus?");
+                    const confirmar = confirm("¿Eliminar este bus?");
                     if (!confirmar) {
                         event.preventDefault();
                     }
