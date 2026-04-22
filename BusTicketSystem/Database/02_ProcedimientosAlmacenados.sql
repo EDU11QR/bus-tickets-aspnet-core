@@ -60,7 +60,6 @@ GO
 CREATE OR ALTER PROCEDURE sp_ListarBuses
     @Pagina INT,
     @FilasPorPagina INT
-<<<<<<< HEAD
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -94,8 +93,6 @@ END;
 GO
 
 CREATE OR ALTER PROCEDURE sp_ListarBusesCombo
-=======
->>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -111,10 +108,7 @@ BEGIN
         Pisos,
         Estado
     FROM Buses
-<<<<<<< HEAD
     WHERE Estado = 1
-    ORDER BY IdBus ASC;
-=======
     ORDER BY IdBus ASC
     OFFSET @Saltos ROWS
     FETCH NEXT @FilasPorPagina ROWS ONLY;
@@ -129,7 +123,6 @@ BEGIN
 
     SELECT COUNT(*) AS TotalRegistros
     FROM Buses;
->>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
 END;
 GO
 
@@ -404,8 +397,6 @@ GO
 SELECT * FROM Asientos;
 GO
 
-<<<<<<< HEAD
-
 --SP para volver activo o restaurar un horario (ponerlo para seleccionar)
 
 CREATE OR ALTER PROCEDURE sp_RestaurarHorario
@@ -549,7 +540,6 @@ GO
 
 
 exec sp_ListarRutas;
-=======
 INSERT INTO Buses ( Placa, Modelo, Capacidad, Pisos, Estado) VALUES
 ( 'LMN-112', 'Volvo 9800', 50, 2, 1),
 ( 'PQR-345', 'Mercedes Benz O500', 40, 1, 1),
@@ -576,4 +566,3 @@ INSERT INTO Buses ( Placa, Modelo, Capacidad, Pisos, Estado) VALUES
 ( 'ABC-678', 'Scania K410', 45, 1, 0),
 ( 'DEF-901', 'Marcopolo Paradiso', 60, 2, 1),
 ( 'GHI-234', 'Irizar i6', 45, 1, 1);
->>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449

@@ -14,11 +14,7 @@ namespace BusTicketSystem.Repositories
             _conexionBD = conexionBD;
         }
 
-<<<<<<< HEAD
-=======
         // Listar buses
-
->>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
         public List<Bus> ListarBuses(int pagina, int filasPorPagina)
         {
             List<Bus> lista = new List<Bus>();
@@ -80,7 +76,6 @@ namespace BusTicketSystem.Repositories
         }
 
 
-<<<<<<< HEAD
         public List<Bus> ListarBusesCombo()
         {
             List<Bus> lista = new List<Bus>();
@@ -118,8 +113,6 @@ namespace BusTicketSystem.Repositories
 
 
 
-=======
->>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
         // Metodo para crear un Bus //
 
         public void InsertarBus(Bus bus)
