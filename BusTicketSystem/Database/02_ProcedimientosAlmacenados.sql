@@ -60,6 +60,7 @@ GO
 CREATE OR ALTER PROCEDURE sp_ListarBuses
     @Pagina INT,
     @FilasPorPagina INT
+<<<<<<< HEAD
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -93,9 +94,14 @@ END;
 GO
 
 CREATE OR ALTER PROCEDURE sp_ListarBusesCombo
+=======
+>>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    DECLARE @Saltos INT;
+    SET @Saltos = (@Pagina - 1) * @FilasPorPagina;
 
     SELECT 
         IdBus,
@@ -105,8 +111,25 @@ BEGIN
         Pisos,
         Estado
     FROM Buses
+<<<<<<< HEAD
     WHERE Estado = 1
     ORDER BY IdBus ASC;
+=======
+    ORDER BY IdBus ASC
+    OFFSET @Saltos ROWS
+    FETCH NEXT @FilasPorPagina ROWS ONLY;
+END;
+GO
+
+-- PA PARA CONTAR BUSES
+CREATE OR ALTER PROCEDURE sp_ContarBuses
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS TotalRegistros
+    FROM Buses;
+>>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
 END;
 GO
 
@@ -365,7 +388,7 @@ GO
 
 -- EJECUTAMOS 
 
-EXEC sp_ListarBuses;
+EXEC sp_ListarBuses 1,30 ;
 
 EXEC sp_ListarRutas;
 
@@ -381,6 +404,7 @@ GO
 SELECT * FROM Asientos;
 GO
 
+<<<<<<< HEAD
 
 --SP para volver activo o restaurar un horario (ponerlo para seleccionar)
 
@@ -525,3 +549,31 @@ GO
 
 
 exec sp_ListarRutas;
+=======
+INSERT INTO Buses ( Placa, Modelo, Capacidad, Pisos, Estado) VALUES
+( 'LMN-112', 'Volvo 9800', 50, 2, 1),
+( 'PQR-345', 'Mercedes Benz O500', 40, 1, 1),
+( 'STU-678', 'Scania K410', 45, 1, 1),
+( 'VWX-901', 'Irizar i6', 45, 1, 0),
+( 'YZA-234', 'Marcopolo Paradiso', 60, 2, 1),
+( 'BCD-567', 'Volvo 9800', 50, 2, 1),
+( 'EFG-890', 'Mercedes Benz O500', 40, 1, 1),
+( 'HIJ-123', 'Scania K410', 45, 1, 1),
+( 'KLM-456', 'Marcopolo Paradiso', 60, 2, 1),
+( 'NOP-789', 'Irizar i6', 45, 1, 1),
+( 'QRS-012', 'Volvo 9800', 50, 2, 0),
+( 'TUV-345', 'Mercedes Benz O500', 40, 1, 1),
+( 'WXY-678', 'Scania K410', 45, 1, 1),
+( 'ZAB-901', 'Marcopolo Paradiso', 60, 2, 1),
+( 'CDE-234', 'Irizar i6', 45, 1, 1),
+( 'FGH-567', 'Volvo 9800', 50, 2, 1),
+( 'IJK-890', 'Mercedes Benz O500', 40, 1, 0),
+( 'LMN-123', 'Scania K410', 45, 1, 1),
+( 'OPQ-456', 'Marcopolo Paradiso', 60, 2, 1),
+( 'RST-789', 'Irizar i6', 45, 1, 1),
+( 'UVW-012', 'Volvo 9800', 50, 2, 1),
+( 'XYZ-345', 'Mercedes Benz O500', 40, 1, 1),
+( 'ABC-678', 'Scania K410', 45, 1, 0),
+( 'DEF-901', 'Marcopolo Paradiso', 60, 2, 1),
+( 'GHI-234', 'Irizar i6', 45, 1, 1);
+>>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449

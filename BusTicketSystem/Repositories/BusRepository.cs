@@ -14,6 +14,11 @@ namespace BusTicketSystem.Repositories
             _conexionBD = conexionBD;
         }
 
+<<<<<<< HEAD
+=======
+        // Listar buses
+
+>>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
         public List<Bus> ListarBuses(int pagina, int filasPorPagina)
         {
             List<Bus> lista = new List<Bus>();
@@ -75,6 +80,7 @@ namespace BusTicketSystem.Repositories
         }
 
 
+<<<<<<< HEAD
         public List<Bus> ListarBusesCombo()
         {
             List<Bus> lista = new List<Bus>();
@@ -112,6 +118,8 @@ namespace BusTicketSystem.Repositories
 
 
 
+=======
+>>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
         // Metodo para crear un Bus //
 
         public void InsertarBus(Bus bus)
@@ -184,6 +192,23 @@ namespace BusTicketSystem.Repositories
                     cmd.Parameters.AddWithValue("@Capacidad", bus.Capacidad);
                     cmd.Parameters.AddWithValue("@Pisos", bus.Pisos);
                     cmd.Parameters.AddWithValue("@Estado", bus.Estado);
+
+                    conexion.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        //Metodo para eliminar bus
+
+        public void EliminarBus(int id)
+        {
+            using (SqlConnection conexion = _conexionBD.ObtenerConexion())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_EliminarBus", conexion))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@IdBus", id);
 
                     conexion.Open();
                     cmd.ExecuteNonQuery();

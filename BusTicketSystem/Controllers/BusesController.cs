@@ -51,7 +51,12 @@ namespace BusTicketSystem.Controllers
             return View(bus);
         }
 
+<<<<<<< HEAD
         
+=======
+        // Metodo para Editar
+        [HttpGet]
+>>>>>>> 95c990f8677cec73fead55ba938c5261d31b2449
         public IActionResult Editar(int id)
         {
             var bus = _busRepository.ObtenerBusPorId(id);
@@ -74,6 +79,14 @@ namespace BusTicketSystem.Controllers
             }
 
             return View(bus);
+        }
+
+        // Metodo para eliminar
+        [HttpPost]
+        public IActionResult Eliminar(int id)
+        {
+            _busRepository.EliminarBus(id);
+            return RedirectToAction("Index");
         }
 
     }
