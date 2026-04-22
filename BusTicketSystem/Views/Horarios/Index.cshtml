@@ -1,0 +1,494 @@
+﻿@model List<BusTicketSystem.Models.Horario>
+
+@{
+    ViewData["Title"] = "Lista de Horarios";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<div class="card-custom">
+
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h3 class="m-0">Lista de Horarios</h3>
+
+        <div class="d-flex align-items-center gap-3">
+
+            <a asp-action="Crear" class="btn btn-success">
+                + Nuevo Horario
+            </a>
+
+            <div class="d-flex align-items-center gap-2">
+
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="d-flex gap-3 mb-2">
+
+        <span class="badge bg-success" id="countActivos">
+            Activos: 0
+        </span>
+
+        <span class="badge bg-secondary" id="countInactivos">
+            Inactivos: 0
+        </span>
+
+    </div>
+    <div class="d-flex gap-2 mb-3">
+
+        <form method="get" class="d-flex gap-2 align-items-center">
+
+            
+            <label class="switch-pro">
+                <<input type="checkbox"
+                        id="toggleEstado"
+                        name="verEliminados"
+                        value="true"
+                @(ViewBag.VerEliminados ? "checked" : "") />
+                <span class="slider-pro"></span>
+            </label>
+
+            <span>Ver eliminados</span>
+
+            
+            <input type="date"
+                   name="fecha"
+                   class="form-control"
+                   value="@(ViewBag.Fecha != null ? ((DateTime)ViewBag.Fecha).ToString("yyyy-MM-dd") : "")" />
+
+            
+            <button class="btn btn-primary">
+                Filtrar
+            </button>
+
+            
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                Limpiar
+            </a>
+
+        </form>
+
+    </div>
+    <table class="table table-hover align-middle">
+
+        <thead>
+            <tr>
+                <th onclick="ordenarTabla(0)">Ruta</th>
+                <th onclick="ordenarTabla(1)">Bus</th>
+                <th onclick="ordenarTabla(2)">Fecha</th>
+                <th onclick="ordenarTabla(3)">Salida</th>
+                <th onclick="ordenarTabla(4)">Llegada</th>
+                <th onclick="ordenarTabla(5)">Precio</th>
+                <th>Estado</th>
+                <th class="text-center" style="width:150px;">Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaHorarios">
+            @foreach (var h in Model)
+            {
+                <tr>
+                    <td>@h.Origen - @h.Destino</td>
+                    <td>@h.Placa</td>
+                    <td>@h.FechaSalida.ToString("dd/MM/yyyy")</td>
+                    <td>@h.HoraSalida</td>
+                    <td>@h.HoraLlegada</td>
+                    <td><strong>S/. @h.Precio</strong></td>
+
+                    <td>
+                        @if (h.Estado)
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactivo</span>
+                        }
+                    </td>
+
+                    <td class="text-center">
+                        <a asp-action="Editar" asp-route-id="@h.IdHorario"
+                           class="btn btn-warning btn-sm me-1">
+                            ✏️
+                        </a>
+
+                        @if (h.Estado)
+                        {
+                            <button class="btn btn-danger btn-sm btnEliminar"
+                                    data-id="@h.IdHorario">
+                                🗑️
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success btn-sm btnRestaurar"
+                                    data-id="@h.IdHorario">
+                                ♻️
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+    <div class="text-center mt-3">
+
+        <!-- ANTERIOR -->
+        <a class="btn btn-outline-secondary @(ViewBag.PaginaActual == 1 ? "disabled" : "")"
+           href="@Url.Action("Index", new {
+            pagina = ViewBag.PaginaActual - 1,
+            verEliminados = ViewBag.VerEliminados,
+            fecha = ViewBag.Fecha
+       })">
+            Anterior
+        </a>
+
+        <span class="mx-2">
+            Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas
+        </span>
+
+        <!-- SIGUIENTE -->
+        <a class="btn btn-outline-secondary @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")"
+           href="@Url.Action("Index", new {
+            pagina = ViewBag.PaginaActual + 1,
+            verEliminados = ViewBag.VerEliminados,
+            fecha = ViewBag.Fecha
+       })">
+            Siguiente
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <p>¿Seguro que deseas eliminar este horario?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmarEliminar">
+                    Eliminar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="toast" class="toast-custom">✔ Eliminado correctamente</div>
+@section Scripts {
+    <script>
+        let sortColumn = -1;
+        let sortAsc = true;
+        let idEliminar = 0;
+
+        // 🔥 ACTIVAR BOTONES ELIMINAR
+        function activarEventos() {
+            document.querySelectorAll(".btnEliminar").forEach(btn => {
+                btn.onclick = function () {
+                    idEliminar = this.getAttribute("data-id");
+
+                    let modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+                    modal.show();
+                };
+            });
+        }
+
+        // 🔥 ELIMINAR
+        document.getElementById("confirmarEliminar").addEventListener("click", function () {
+
+            fetch('/Horarios/Eliminar/' + idEliminar, {
+                method: 'POST'
+            })
+            .then(response => {
+        if (response.ok) {
+
+            let btn = document.querySelector(`.btnEliminar[data-id='${idEliminar}']`);
+            let fila = btn.closest("tr");
+
+            const verEliminados = document.getElementById("toggleEstado").checked;
+
+            // cerrar modal
+            let modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminar'));
+            modal.hide();
+
+            if (verEliminados) {
+
+                let badge = fila.querySelector(".badge");
+
+                badge.className = "badge bg-secondary";
+                badge.innerText = "Inactivo";
+
+                btn.className = "btn btn-success btn-sm btnRestaurar";
+                btn.innerHTML = "♻️";
+                btn.blur();
+
+                fila.setAttribute("data-visible", "true");
+
+                activarRestaurar();
+
+            } else {
+
+                fila.style.transition = "0.5s";
+                fila.style.opacity = "0";
+
+                setTimeout(() => {
+                    fila.remove();
+                    actualizarContador();
+                    
+                }, 500);
+
+                return; // 🔥 IMPORTANTE
+            }
+
+            actualizarContador();
+            
+            mostrarToast("Eliminado correctamente");
+        }
+            });
+        });
+
+
+        // 🔥 TOGGLE (VER ELIMINADOS)
+        document.getElementById("toggleEstado").addEventListener("change", function () {
+            this.form.submit(); // 🔥 ENVÍA EL FORM AUTOMÁTICAMENTE
+        });
+
+
+        // 🔄 RESTAURAR (SIN RECARGAR)
+        function activarRestaurar() {
+            document.querySelectorAll(".btnRestaurar").forEach(btn => {
+                btn.onclick = function () {
+
+                    let id = this.getAttribute("data-id");
+
+                    fetch('/Horarios/Restaurar/' + id, {
+                        method: 'POST'
+                    })
+                    .then(res => {
+                        if (res.ok) {
+
+                            let fila = this.closest("tr");
+                            const verEliminados = document.getElementById("toggleEstado").checked;
+
+                            if (!verEliminados) {
+
+                                fila.remove();
+
+                            } else {
+
+                                let badge = fila.querySelector(".badge");
+
+                                badge.className = "badge bg-success";
+                                badge.innerText = "Activo";
+
+                                this.className = "btn btn-danger btn-sm btnEliminar";
+                                this.innerHTML = "🗑️";
+                                this.blur();
+
+                                activarEventos();
+                            }
+
+                            actualizarContador();
+                            
+                            mostrarToast("Restaurado correctamente");
+                        }
+                    });
+                };
+            });
+        }
+        function actualizarContador() {
+
+            let filas = document.querySelectorAll("#tablaHorarios tr");
+
+            let activos = 0;
+            let inactivos = 0;
+
+            filas.forEach(fila => {
+
+                // SOLO contar visibles
+                if (fila.getAttribute("data-visible") === "false") return;
+
+                let badge = fila.querySelector(".badge");
+
+                if (!badge) return;
+
+                if (badge.classList.contains("bg-success")) {
+                    activos++;
+                } else if (badge.classList.contains("bg-secondary")) {
+                    inactivos++;
+                }
+            });
+
+            document.getElementById("countActivos").innerText = "Activos: " + activos;
+            document.getElementById("countInactivos").innerText = "Inactivos: " + inactivos;
+        }
+        function filtrarPorFecha() {
+            let fecha = document.getElementById("fechaFiltro").value;
+
+            document.querySelectorAll("#tablaHorarios tr").forEach(tr => {
+                let fechaFila = tr.children[2].innerText;
+
+                if (!fecha || fechaFila === formatFecha(fecha)) {
+                    tr.setAttribute("data-visible", "true");
+                    tr.style.display = "";
+                } else {
+                    tr.setAttribute("data-visible", "false");
+                    tr.style.display = "none";
+                }
+            });
+
+            currentPage = 1;
+            
+        }
+
+        function limpiarFiltro() {
+            document.getElementById("fechaFiltro").value = "";
+
+            document.querySelectorAll("#tablaHorarios tr").forEach(tr => {
+                tr.setAttribute("data-visible", "true");
+                tr.style.display = "";
+            });
+
+            currentPage = 1;
+        }
+
+        function formatFecha(fecha) {
+            let [y, m, d] = fecha.split("-");
+            return `${d}/${m}/${y}`;
+        }
+
+    
+
+       
+
+
+        function ordenarTabla(colIndex) {
+
+            let rows = Array.from(document.querySelectorAll("#tablaHorarios tr"));
+
+            // SOLO visibles lógicos
+            let visibles = rows.filter(r => r.getAttribute("data-visible") !== "false");
+
+            // toggle asc/desc
+            if (sortColumn === colIndex) {
+                sortAsc = !sortAsc;
+            } else {
+                sortColumn = colIndex;
+                sortAsc = true;
+            }
+
+            visibles.sort((a, b) => {
+
+                let valA = a.children[colIndex].innerText.trim();
+                let valB = b.children[colIndex].innerText.trim();
+
+                // 🔥 TIPO DE DATO
+                if (colIndex === 5) {
+                    // PRECIO
+                    valA = parseFloat(valA.replace("S/.", ""));
+                    valB = parseFloat(valB.replace("S/.", ""));
+                }
+                else if (colIndex === 2) {
+                    // FECHA dd/MM/yyyy
+                    valA = convertirFecha(valA);
+                    valB = convertirFecha(valB);
+                }
+                else if (colIndex === 3 || colIndex === 4) {
+                    // HORAS
+                    valA = convertirHora(valA);
+                    valB = convertirHora(valB);
+                }
+
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+
+
+
+                return 0;
+            });
+
+            let tbody = document.getElementById("tablaHorarios");
+
+            // mantener orden total
+            let nuevasFilas = [...visibles];
+
+            // agregar las ocultas al final sin tocar orden
+            let ocultas = rows.filter(r => r.getAttribute("data-visible") === "false");
+
+            let ordenFinal = [...nuevasFilas, ...ocultas];
+
+            // render completo
+            ordenFinal.forEach(row => tbody.appendChild(row));
+
+            actualizarIconos(colIndex);
+            currentPage = 1;
+            
+        }
+        function convertirFecha(fecha) {
+            let [d, m, y] = fecha.split("/");
+            return new Date(`${y}-${m}-${d}`);
+        }
+
+        function convertirHora(hora) {
+            let [h, m, s] = hora.split(":");
+            return parseInt(h) * 60 + parseInt(m);
+        }
+        function actualizarIconos(colIndex) {
+
+            let headers = document.querySelectorAll("th");
+
+            headers.forEach((th, index) => {
+                th.innerHTML = th.textContent.replace(/ 🔼| 🔽/g, "");
+
+                if (index === colIndex) {
+                    th.innerHTML += sortAsc ? " 🔼" : " 🔽";
+                }
+            });
+        }
+        // 🔔 TOAST
+        function mostrarToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+
+            toast.classList.add("toast-show");
+
+            setTimeout(() => {
+                toast.classList.remove("toast-show");
+            }, 2000);
+        }
+
+
+        function inicializarTabla() {
+            document.querySelectorAll("#tablaHorarios tr").forEach(tr => {
+                tr.setAttribute("data-visible", "true");
+            });
+
+            activarEventos();
+            activarRestaurar();
+            
+            actualizarContador();
+        }
+
+        // 🔥 LLAMADA
+        inicializarTabla();
+    </script>
+
+
+}

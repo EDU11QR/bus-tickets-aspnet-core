@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BusTicketSystem.Repositories;
 using BusTicketSystem.Models;
+using BusTicketSystem.ViewModels;
 
 namespace BusTicketSystem.Controllers
 {
@@ -13,10 +14,24 @@ namespace BusTicketSystem.Controllers
             _busRepository = busRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int pagina = 1)
         {
-            var buses = _busRepository.ListarBuses();
-            return View(buses);
+            int filasPorPagina = 10;
+            int totalRegistros = _busRepository.ContarBuses();
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / filasPorPagina);
+
+            var buses = _busRepository.ListarBuses(pagina, filasPorPagina);
+
+            BusPaginadoViewModel vm = new BusPaginadoViewModel
+            {
+                Buses = buses,
+                PaginaActual = pagina,
+                TotalPaginas = totalPaginas,
+                FilasPorPagina = filasPorPagina,
+                TotalRegistros = totalRegistros
+            };
+
+            return View(vm);
         }
 
         public IActionResult Crear()
@@ -36,7 +51,7 @@ namespace BusTicketSystem.Controllers
             return View(bus);
         }
 
-        // Metodo para Editar
+        
         public IActionResult Editar(int id)
         {
             var bus = _busRepository.ObtenerBusPorId(id);

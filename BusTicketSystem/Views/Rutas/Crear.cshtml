@@ -1,0 +1,202 @@
+﻿@model BusTicketSystem.Models.Ruta
+
+<h3>Registrar Ruta</h3>
+
+<form asp-action="Crear" method="post">
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <!-- ================= ORIGEN ================= -->
+    <h5>Origen</h5>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label>Departamento</label>
+            <select id="depOrigen" class="form-control">
+                <option value="0">Seleccione</option>
+                @foreach (var d in ViewBag.Departamentos)
+                {
+                    <option value="@d.IdDepartamento">@d.Nombre</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Provincia</label>
+            <select id="provOrigen" class="form-control"></select>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <label>Distrito</label>
+            <select id="distOrigen" class="form-control"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Terminal Origen</label>
+            <select name="IdTerminalOrigen" id="terminalOrigen" class="form-control">
+                <option value="0">Seleccione</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ================= DESTINO ================= -->
+    <h5 class="mt-4">Destino</h5>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label>Departamento</label>
+            <select id="depDestino" class="form-control">
+                <option value="0">Seleccione</option>
+                @foreach (var d in ViewBag.Departamentos)
+                {
+                    <option value="@d.IdDepartamento">@d.Nombre</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Provincia</label>
+            <select id="provDestino" class="form-control"></select>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <label>Distrito</label>
+            <select id="distDestino" class="form-control"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Terminal Destino</label>
+            <select name="IdTerminalDestino" id="terminalDestino" class="form-control">
+                <option value="0">Seleccione</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ================= OTROS ================= -->
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <label>Duración</label>
+            <input asp-for="DuracionEstimada" type="time" class="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label>Precio Base</label>
+            <input asp-for="PrecioBase" type="number" step="0.01" class="form-control" />
+        </div>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>                                                                                       
+@section Scripts {
+    <script>
+
+        // ================= ORIGEN =================
+
+        // Departamento → Provincia
+        document.getElementById("depOrigen").addEventListener("change", function () {
+
+            fetch('/Ubicacion/Provincias?id=' + this.value)
+                .then(r => r.json())
+                .then(data => {
+
+                    let select = document.getElementById("provOrigen");
+                    select.innerHTML = "<option value='0'>Seleccione</option>";
+
+                    data.forEach(x => {
+                        select.innerHTML += `<option value="${x.idProvincia}">${x.nombre}</option>`;
+                    });
+                });
+        });
+
+        // Provincia → Distrito
+        document.getElementById("provOrigen").addEventListener("change", function () {
+
+            fetch('/Ubicacion/Distritos?id=' + this.value)
+                .then(r => r.json())
+                .then(data => {
+
+                    let select = document.getElementById("distOrigen");
+                    select.innerHTML = "<option value='0'>Seleccione</option>";
+
+                    data.forEach(x => {
+                        select.innerHTML += `<option value="${x.idDistrito}">${x.nombre}</option>`;
+                    });
+                });
+        });
+
+        // Distrito → Terminal
+        document.getElementById("distOrigen").addEventListener("change", function () {
+
+            fetch('/Ubicacion/Terminales?id=' + this.value)
+                .then(r => r.json())
+                .then(data => {
+
+                    let select = document.getElementById("terminalOrigen");
+                    select.innerHTML = "<option value='0'>Seleccione</option>";
+
+                    data.forEach(x => {
+                        select.innerHTML += `<option value="${x.idTerminal}">${x.nombre}</option>`;
+                    });
+                });
+        });
+
+
+        // ================= DESTINO =================
+
+        // Departamento → Provincia
+        document.getElementById("depDestino").addEventListener("change", function () {
+
+            fetch('/Ubicacion/Provincias?id=' + this.value)
+                .then(r => r.json())
+                .then(data => {
+
+                    let select = document.getElementById("provDestino");
+                    select.innerHTML = "<option value='0'>Seleccione</option>";
+
+                    data.forEach(x => {
+                        select.innerHTML += `<option value="${x.idProvincia}">${x.nombre}</option>`;
+                    });
+                });
+        });
+
+        // Provincia → Distrito
+        document.getElementById("provDestino").addEventListener("change", function () {
+
+            fetch('/Ubicacion/Distritos?id=' + this.value)
+                .then(r => r.json())
+                .then(data => {
+
+                    let select = document.getElementById("distDestino");
+                    select.innerHTML = "<option value='0'>Seleccione</option>";
+
+                    data.forEach(x => {
+                        select.innerHTML += `<option value="${x.idDistrito}">${x.nombre}</option>`;
+                    });
+                });
+        });
+
+        // Distrito → Terminal
+        document.getElementById("distDestino").addEventListener("change", function () {
+
+            fetch('/Ubicacion/Terminales?id=' + this.value)
+                .then(r => r.json())
+                .then(data => {
+
+                    let select = document.getElementById("terminalDestino");
+                    select.innerHTML = "<option value='0'>Seleccione</option>";
+
+                    data.forEach(x => {
+                        select.innerHTML += `<option value="${x.idTerminal}">${x.nombre}</option>`;
+                    });
+                });
+        });
+
+    </script>
+}

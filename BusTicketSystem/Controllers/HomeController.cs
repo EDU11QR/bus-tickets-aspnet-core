@@ -15,6 +15,10 @@ namespace BusTicketSystem.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.TotalRutas = 10;
+            ViewBag.TotalBuses = 5;
+            ViewBag.TotalHorarios = 20;
+
             return View();
         }
 

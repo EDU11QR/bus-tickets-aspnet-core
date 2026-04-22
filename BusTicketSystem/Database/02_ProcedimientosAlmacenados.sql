@@ -1,5 +1,4 @@
-﻿-- ENTRAMOS A LA BD
-USE BusTicketSystemDB;
+﻿USE BusTicketSystemDB;
 GO
 
 -- CREAMOS PA PARA GENERAR ASIENTOS
@@ -59,6 +58,41 @@ GO
 
 -- PA PARA LISTAR BUSES
 CREATE OR ALTER PROCEDURE sp_ListarBuses
+    @Pagina INT,
+    @FilasPorPagina INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Saltos INT;
+    SET @Saltos = (@Pagina - 1) * @FilasPorPagina;
+
+    SELECT 
+        IdBus,
+        Placa,
+        Modelo,
+        Capacidad,
+        Pisos,
+        Estado
+    FROM Buses
+    ORDER BY IdBus ASC
+    OFFSET @Saltos ROWS
+    FETCH NEXT @FilasPorPagina ROWS ONLY;
+END;
+GO
+
+-- PA PARA CONTAR BUSES
+CREATE OR ALTER PROCEDURE sp_ContarBuses
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS TotalRegistros
+    FROM Buses;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_ListarBusesCombo
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -71,9 +105,12 @@ BEGIN
         Pisos,
         Estado
     FROM Buses
-    ORDER BY IdBus DESC;
+    WHERE Estado = 1
+    ORDER BY IdBus ASC;
 END;
 GO
+
+exec sp_ListarBuses 1,30;
 
 -- PA PARA ACTUALIZAR BUS
 CREATE OR ALTER PROCEDURE sp_ActualizarBus
@@ -134,7 +171,7 @@ GO
 CREATE OR ALTER PROCEDURE sp_InsertarRuta
     @Origen VARCHAR(100),
     @Destino VARCHAR(100),
-    @DuracionEstimada VARCHAR(50),
+    @DuracionEstimada TIME,
     @PrecioBase DECIMAL(10,2),
     @Estado BIT
 AS
@@ -169,7 +206,7 @@ CREATE OR ALTER PROCEDURE sp_ActualizarRuta
     @IdRuta INT,
     @Origen VARCHAR(100),
     @Destino VARCHAR(100),
-    @DuracionEstimada VARCHAR(50),
+    @DuracionEstimada TIME,
     @PrecioBase DECIMAL(10,2),
     @Estado BIT
 AS
@@ -186,6 +223,8 @@ BEGIN
     WHERE IdRuta = @IdRuta;
 END;
 GO
+
+
 
 -- PA PARA ELIMINAR (CAMBIAR DE ESTADO)
 CREATE OR ALTER PROCEDURE sp_EliminarRuta
@@ -237,8 +276,8 @@ BEGIN
 END;
 GO
 
--- PA PARA LISTAR HORARIOS
 CREATE OR ALTER PROCEDURE sp_ListarHorarios
+    @VerEliminados BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -256,8 +295,11 @@ BEGIN
     FROM Horarios h
     INNER JOIN Rutas r ON h.IdRuta = r.IdRuta
     INNER JOIN Buses b ON h.IdBus = b.IdBus
+
+    WHERE (@VerEliminados = 1 OR h.Estado = 1)
+
     ORDER BY h.IdHorario DESC;
-END;
+END
 GO
 
 -- PA PARA ACTUALIZAR HORARIO
@@ -327,7 +369,7 @@ EXEC sp_ListarBuses;
 
 EXEC sp_ListarRutas;
 
-EXEC sp_ListarHorarios;
+
 
 -- GENERAMOS ASIENTOS
 EXEC sp_GenerarAsientosPorBus @IdBus = 1, @Cantidad = 40, @Piso = 1;
@@ -338,3 +380,148 @@ GO
 
 SELECT * FROM Asientos;
 GO
+
+
+--SP para volver activo o restaurar un horario (ponerlo para seleccionar)
+
+CREATE OR ALTER PROCEDURE sp_RestaurarHorario
+    @IdHorario INT
+AS
+BEGIN
+    UPDATE Horarios
+    SET Estado = 1
+    WHERE IdHorario = @IdHorario
+END
+
+GO
+
+
+
+USE BusTicketSystemDB;
+GO
+
+--Primero se hizo con js, sin embargo lo migre al back para que sea menos carga visualmente
+-- esto es para la paginacion
+CREATE OR ALTER PROCEDURE dbo.sp_ListarHorariosPaginado
+    @Pagina INT,
+    @Cantidad INT,
+    @VerEliminados BIT,
+    @Fecha DATE = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        h.IdHorario,
+        r.Origen,
+        r.Destino,
+        b.Placa,
+        h.FechaSalida,
+        h.HoraSalida,
+        h.HoraLlegada,
+        h.Precio,
+        h.Estado
+    FROM Horarios h
+    INNER JOIN Rutas r ON h.IdRuta = r.IdRuta
+    INNER JOIN Buses b ON h.IdBus = b.IdBus
+    WHERE 
+        (@VerEliminados = 1 OR h.Estado = 1)
+        AND (@Fecha IS NULL OR h.FechaSalida = @Fecha)
+
+    ORDER BY h.IdHorario DESC
+    OFFSET (@Pagina - 1) * @Cantidad ROWS
+    FETCH NEXT @Cantidad ROWS ONLY;
+END
+
+GO
+
+--esto hace el conteo por registros
+
+CREATE OR ALTER PROCEDURE sp_TotalHorarios
+    @VerEliminados BIT,
+    @Fecha DATE = NULL
+AS
+BEGIN
+    SELECT COUNT(*)
+    FROM Horarios
+    WHERE 
+        (@VerEliminados = 1 OR Estado = 1)
+        AND (@Fecha IS NULL OR FechaSalida = @Fecha)
+END
+GO
+
+
+--podemos listar terminales con sus forenkey , por el momento solo lo uso para rutas 
+--pero se puede usar en otros modulos
+CREATE OR ALTER PROCEDURE sp_ListarTerminales
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        t.IdTerminal,
+        t.Nombre AS Terminal,
+        d.Nombre AS Distrito,
+        p.Nombre AS Provincia,
+        dep.Nombre AS Departamento,
+        d.CodigoPostal,
+        t.Direccion,
+        t.Estado
+    FROM Terminales t
+    INNER JOIN Distritos d ON t.IdDistrito = d.IdDistrito
+    INNER JOIN Provincias p ON d.IdProvincia = p.IdProvincia
+    INNER JOIN Departamentos dep ON p.IdDepartamento = dep.IdDepartamento
+    ORDER BY dep.Nombre, p.Nombre, d.Nombre, t.Nombre;
+END
+GO
+
+EXEC sp_ListarTerminales;
+
+--igualmente, solo que en este caso solo nos aayudara para el combo y seleccionar que provincias tenemos por departamente
+CREATE OR ALTER PROCEDURE sp_ProvinciasPorDepartamento
+@IdDepartamento INT
+AS
+BEGIN
+    SELECT IdProvincia, Nombre
+    FROM Provincias
+    WHERE IdDepartamento = @IdDepartamento
+END
+GO
+
+--igual que el de arriba
+CREATE OR ALTER PROCEDURE sp_DistritosPorProvincia
+@IdProvincia INT
+AS
+BEGIN
+    SELECT IdDistrito, Nombre
+    FROM Distritos
+    WHERE IdProvincia = @IdProvincia
+END
+GO
+
+
+--igual para filtar terminales por istrito
+CREATE OR ALTER PROCEDURE sp_TerminalesPorDistrito
+@IdDistrito INT
+AS
+BEGIN
+    SELECT IdTerminal, Nombre
+    FROM Terminales
+    WHERE IdDistrito = @IdDistrito AND Estado = 1
+END
+GO
+
+--igual 
+CREATE OR ALTER PROCEDURE sp_ListarDepartamentos
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT IdDepartamento, Nombre
+    FROM Departamentos
+    ORDER BY Nombre
+END
+GO
+
+
+exec sp_ListarRutas;

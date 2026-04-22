@@ -67,7 +67,7 @@ CREATE TABLE Rutas (
     IdRuta INT PRIMARY KEY IDENTITY(1,1),
     Origen VARCHAR(100) NOT NULL,
     Destino VARCHAR(100) NOT NULL,
-    DuracionEstimada VARCHAR(50) NOT NULL,
+    DuracionEstimada TIME NOT NULL,
     PrecioBase DECIMAL(10,2) NOT NULL,
     Estado BIT NOT NULL DEFAULT 1
 );
@@ -121,4 +121,100 @@ CREATE TABLE DetalleReserva (
     CONSTRAINT FK_DetalleReserva_Reserva FOREIGN KEY (IdReserva) REFERENCES Reservas(IdReserva),
     CONSTRAINT FK_DetalleReserva_Asiento FOREIGN KEY (IdAsiento) REFERENCES Asientos(IdAsiento)
 );
+GO
+
+
+
+SELECT h.*, r.Origen, r.Destino, b.Placa
+FROM Horarios h
+INNER JOIN Rutas r ON h.IdRuta = r.IdRuta
+INNER JOIN Buses b ON h.IdBus = b.IdBus
+
+
+
+
+
+GO
+
+
+USE BusTicketSystemDB;
+GO
+
+SELECT IdRuta, Origen, Destino, DuracionEstimada
+FROM Rutas;
+
+--aqui solo actualice las horas pq en rutas se definieron como varchar pero lo cambie a time
+
+UPDATE Rutas SET DuracionEstimada = '16:00:00' WHERE IdRuta = 1;
+UPDATE Rutas SET DuracionEstimada = '20:00:00' WHERE IdRuta = 2;
+UPDATE Rutas SET DuracionEstimada = '06:00:00' WHERE IdRuta = 3;
+UPDATE Rutas SET DuracionEstimada = '10:00:00' WHERE IdRuta = 4;
+
+select * from Rutas;
+
+--aqui cree nuevas tablas para el tema de las rutas, ya que por logica en cada departamento/provincia hay un terminal xxxx, entonces por ello se crearon esas tablas
+--para tambien en horarios tener mas claridad el origen y llegada
+CREATE TABLE Departamentos (
+    IdDepartamento INT PRIMARY KEY IDENTITY,
+    Nombre VARCHAR(100)
+);
+GO
+
+
+CREATE TABLE Provincias (
+    IdProvincia INT PRIMARY KEY IDENTITY,
+    Nombre VARCHAR(100),
+    IdDepartamento INT,
+
+    FOREIGN KEY (IdDepartamento) REFERENCES Departamentos(IdDepartamento)
+);
+GO
+
+
+CREATE TABLE Distritos (
+    IdDistrito INT PRIMARY KEY IDENTITY,
+    Nombre VARCHAR(100),
+    CodigoPostal VARCHAR(10),
+    IdProvincia INT,
+
+    FOREIGN KEY (IdProvincia) REFERENCES Provincias(IdProvincia)
+);
+GO
+
+
+CREATE TABLE Terminales (
+    IdTerminal INT PRIMARY KEY IDENTITY,
+    Nombre VARCHAR(100),
+    IdDistrito INT,
+    Direccion VARCHAR(200),
+    Estado BIT DEFAULT 1,
+
+    FOREIGN KEY (IdDistrito) REFERENCES Distritos(IdDistrito)
+);
+GO
+
+
+--aqui solo a adimos unos campos y vinculamos con otras tablas
+ALTER TABLE Rutas
+ADD IdTerminalOrigen INT,
+    IdTerminalDestino INT;
+
+
+ALTER TABLE Rutas
+ADD CONSTRAINT FK_Ruta_TerminalOrigen 
+FOREIGN KEY (IdTerminalOrigen) REFERENCES Terminales(IdTerminal);
+
+ALTER TABLE Rutas
+ADD CONSTRAINT FK_Ruta_TerminalDestino 
+FOREIGN KEY (IdTerminalDestino) REFERENCES Terminales(IdTerminal);
+
+SELECT 
+    COLUMN_NAME,
+    DATA_TYPE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'Rutas'
+  AND COLUMN_NAME = 'DuracionEstimada';
+
+  ALTER TABLE Rutas
+ALTER COLUMN DuracionEstimada TIME NOT NULL;
 GO

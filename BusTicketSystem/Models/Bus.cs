@@ -10,5 +10,7 @@
         public int Pisos { get; set; }
         public bool Estado { get; set; }
 
+
+
     }
 }

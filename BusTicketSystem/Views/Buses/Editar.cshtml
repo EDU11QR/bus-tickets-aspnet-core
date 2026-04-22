@@ -8,6 +8,7 @@
 <h2>Editar Bus</h2>
 
 <form asp-action="Editar" method="post">
+    @Html.AntiForgeryToken()
     <input asp-for="IdBus" type="hidden" />
 
     <div class="mb-3">

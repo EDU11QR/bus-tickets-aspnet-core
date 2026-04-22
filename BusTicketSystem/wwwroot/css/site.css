@@ -1,4 +1,4 @@
-html {
+﻿html {
   font-size: 14px;
 }
 
@@ -19,4 +19,144 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+
+.switch-pro {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    flex-shrink: 0; 
+    display: inline-block; 
+}
+
+    .switch-pro input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.slider-pro {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #2c2c3a;
+    border-radius: 50px;
+    transition: 0.4s;
+}
+
+   
+    .slider-pro::before {
+        content: "";
+        position: absolute;
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        top: 4px;
+        background: #ccc;
+        border-radius: 50%;
+        transition: 0.4s;
+    }
+
+
+.switch-pro input:checked + .slider-pro {
+    background: linear-gradient(135deg, #00c853, #00e676);
+}
+
+    .switch-pro input:checked + .slider-pro::before {
+        transform: translateX(30px);
+        background: white;
+    }
+
+
+.slider-pro::after {
+    content: "✕";
+    position: absolute;
+    font-size: 12px;
+    left: 10px;
+    top: 6px;
+    color: #999;
+    transition: 0.3s;
+}
+
+.switch-pro input:checked + .slider-pro::after {
+    content: "✔";
+    left: 14px;
+    color: white;
+}
+
+.toast-custom {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #00c853;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    opacity: 0;
+    transition: 0.5s;
+}
+
+.toast-show {
+    opacity: 1;
+}
+
+.modal-dialog {
+    max-width: 400px; 
+}
+
+.modal-content {
+    border-radius: 12px;
+}
+
+.modal-header {
+    padding: 10px 15px;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.modal-footer {
+    padding: 10px;
+}
+
+.hero {
+    background: url('/img/banner-bus.jpg') center/cover no-repeat;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-content {
+    background: rgba(0,0,0,0.5);
+    padding: 20px 40px;
+    border-radius: 10px;
+    text-align: center;
+}
+.card {
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+    .card:hover {
+        transform: translateY(-6px);
+    }
+
+.stat-card {
+    background: linear-gradient(135deg, #00c853, #00e676);
+    color: white;
+}
+
+img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.img-card {
+    width: 100%;
+    height: 600px; 
+    object-fit: cover; 
+    border-radius: 10px;
 }

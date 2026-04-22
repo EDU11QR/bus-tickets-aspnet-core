@@ -1,4 +1,4 @@
-﻿@model List<BusTicketSystem.Models.Bus>
+﻿@model BusTicketSystem.ViewModels.BusPaginadoViewModel
 
 @{
     ViewData["Title"] = "Listado de Buses";
@@ -9,8 +9,8 @@
 
 <a asp-action="Crear" class="btn btn-success mb-3">Nuevo Bus</a>
 
-<table class="table table-bordered">
-    <thead>
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
         <tr>
             <th>ID</th>
             <th>Placa</th>
@@ -22,7 +22,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var bus in Model)
+        @foreach (var bus in Model.Buses)
         {
             <tr>
                 <td>@bus.IdBus</td>
@@ -33,8 +33,56 @@
                 <td>@(bus.Estado ? "Activo" : "Inactivo")</td>
                 <td>
                     <a asp-action="Editar" asp-route-id="@bus.IdBus" class="btn btn-warning btn-sm">Editar</a>
+
+                    <form asp-action="Eliminar" asp-route-id="@bus.IdBus" method="post" class="form-eliminar d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<nav>
+    <ul class="pagination">
+        @if (Model.PaginaActual > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual - 1)">Anterior</a>
+            </li>
+        }
+
+        @for (int i = 1; i <= Model.TotalPaginas; i++)
+        {
+            <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+            </li>
+        }
+
+        @if (Model.PaginaActual < Model.TotalPaginas)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual + 1)">Siguiente</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+<p>Total de registros: @Model.TotalRegistros</p>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const formularios = document.querySelectorAll(".form-eliminar");
+
+            formularios.forEach(function (form) {
+                form.addEventListener("submit", function (event) {
+                    const confirmar = confirm("¿Estás seguro de eliminar este bus?");
+                    if (!confirmar) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}

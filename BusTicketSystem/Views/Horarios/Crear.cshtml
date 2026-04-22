@@ -1,0 +1,133 @@
+﻿@model BusTicketSystem.Models.Horario
+@{
+    ViewData["Title"] = "Registrar Horario";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<h2>Registrar Horario</h2>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Crear" method="post">
+
+    <div class="form-group">
+        <label>Ruta</label>
+        <select asp-for="IdRuta" class="form-control" id="rutaSelect">
+            <option value="">Seleccione una ruta</option>
+            @foreach (var r in ViewBag.Rutas)
+            {
+                <option value="@r.IdRuta" data-duracion="@r.DuracionEstimada">
+                    @r.Origen - @r.Destino
+                </option>
+            }
+        </select>
+        <span asp-validation-for="IdRuta" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Bus</label>
+        <select asp-for="IdBus" class="form-control">
+            <option value="">Seleccione un bus</option>
+            @foreach (var b in ViewBag.Buses)
+            {
+                <option value="@b.IdBus">
+                    @b.Placa
+                </option>
+            }
+        </select>
+        <span asp-validation-for="IdBus" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Fecha</label>
+        <input asp-for="FechaSalida" type="date" class="form-control" />
+        <span asp-validation-for="FechaSalida" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Hora Salida</label>
+        <input asp-for="HoraSalida" type="time" class="form-control" />
+        <span asp-validation-for="HoraSalida" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Hora Llegada</label>
+        <input id="horaLlegada" class="form-control" readonly />
+        <small id="infoLlegada" class="text-muted"></small>
+    </div>
+
+    <div class="form-group">
+        <label>Precio</label>
+        <input asp-for="Precio" class="form-control" />
+        <span asp-validation-for="Precio" class="text-danger"></span>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const rutaSelect = document.getElementById("rutaSelect");
+        const horaSalida = document.querySelector("input[name='HoraSalida']");
+        const fechaSalida = document.querySelector("input[name='FechaSalida']");
+        const horaLlegada = document.getElementById("horaLlegada");
+
+        function calcularLlegada() {
+            const selected = rutaSelect.options[rutaSelect.selectedIndex];
+            const duracion = selected.getAttribute("data-duracion");
+            const info = document.getElementById("infoLlegada");
+
+            if (!duracion || !horaSalida.value || !fechaSalida.value) {
+                horaLlegada.value = "";
+                info.textContent = "";
+                return;
+            }
+
+            try {
+                const partes = duracion.split(":");
+                const hDur = parseInt(partes[0]);
+                const mDur = parseInt(partes[1]);
+
+                let salida = new Date(fechaSalida.value + "T" + horaSalida.value);
+                let llegada = new Date(salida);
+
+                llegada.setHours(llegada.getHours() + hDur);
+                llegada.setMinutes(llegada.getMinutes() + mDur);
+
+                
+                let h = llegada.getHours().toString().padStart(2, '0');
+                let m = llegada.getMinutes().toString().padStart(2, '0');
+
+                horaLlegada.value = `${h}:${m}`;
+
+                
+                let dia = llegada.getDate().toString().padStart(2, '0');
+                let mes = (llegada.getMonth() + 1).toString().padStart(2, '0');
+                let anio = llegada.getFullYear();
+
+                let fechaTexto = `${dia}/${mes}/${anio}`;
+
+                
+                if (llegada.getDate() > salida.getDate()) {
+                    info.textContent = `Llega el ${fechaTexto} (día siguiente)`;
+                } else {
+                    info.textContent = `Llega el mismo día (${fechaTexto})`;
+                }
+
+            } catch (e) {
+                console.error("Error calculando llegada", e);
+            }
+        }
+         rutaSelect.addEventListener("change", calcularLlegada);
+        horaSalida.addEventListener("change", calcularLlegada);
+        fechaSalida.addEventListener("change", calcularLlegada);
+
+        
+        calcularLlegada();
+    </script>
+}
