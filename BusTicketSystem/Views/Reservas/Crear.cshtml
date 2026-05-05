@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Reservar Asientos";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+
+    var asientos = ViewBag.Asientos as List<BusTicketSystem.Models.Asiento>;
+}
+
+<h3>Seleccionar Asientos</h3>
+
+<form method="post">
+
+    <input type="hidden" name="idHorario" value="@ViewBag.IdHorario" />
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="row">
+
+        @foreach (var a in asientos)
+        {
+            <div class="col-md-2 mb-3 text-center">
+
+                <label class="btn w-100
+                        @(a.Estado ? "btn-outline-success" : "btn-danger disabled")">
+
+                    <input type="checkbox"
+                           name="asientosSeleccionados"
+                           value="@a.IdAsiento"
+                           @(a.Estado ? "" : "disabled") />
+
+                    @a.NumeroAsiento
+
+                </label>
+
+            </div>
+        }
+
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">
+        Confirmar Reserva
+    </button>
+
+</form>

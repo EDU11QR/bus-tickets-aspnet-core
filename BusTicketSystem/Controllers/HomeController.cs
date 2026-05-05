@@ -15,6 +15,13 @@ namespace BusTicketSystem.Controllers
 
         public IActionResult Index()
         {
+            // 🔥 VALIDAR LOGIN
+            if (HttpContext.Session.GetInt32("IdUsuario") == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // 🔥 DATOS DASHBOARD
             ViewBag.TotalRutas = 10;
             ViewBag.TotalBuses = 5;
             ViewBag.TotalHorarios = 20;
@@ -24,6 +31,12 @@ namespace BusTicketSystem.Controllers
 
         public IActionResult Privacy()
         {
+            // opcional proteger también
+            if (HttpContext.Session.GetInt32("IdUsuario") == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             return View();
         }
 

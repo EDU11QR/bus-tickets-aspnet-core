@@ -109,27 +109,35 @@
                         }
                     </td>
 
-                    <td class="text-center">
-                        <a asp-action="Editar" asp-route-id="@h.IdHorario"
-                           class="btn btn-warning btn-sm me-1">
-                            ✏️
-                        </a>
+                   <td class="text-center">
 
-                        @if (h.Estado)
-                        {
-                            <button class="btn btn-danger btn-sm btnEliminar"
-                                    data-id="@h.IdHorario">
-                                🗑️
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-success btn-sm btnRestaurar"
-                                    data-id="@h.IdHorario">
-                                ♻️
-                            </button>
-                        }
-                    </td>
+    <!-- 🔥 NUEVO BOTÓN RESERVAR -->
+    <a href="/Reservas/Crear?idHorario=@h.IdHorario"
+       class="btn btn-primary btn-sm me-1">
+        🎫
+    </a>
+
+    <a asp-action="Editar" asp-route-id="@h.IdHorario"
+       class="btn btn-warning btn-sm me-1">
+        ✏️
+    </a>
+
+    @if (h.Estado)
+    {
+        <button class="btn btn-danger btn-sm btnEliminar"
+                data-id="@h.IdHorario">
+            🗑️
+        </button>
+    }
+    else
+    {
+        <button class="btn btn-success btn-sm btnRestaurar"
+                data-id="@h.IdHorario">
+            ♻️
+        </button>
+    }
+
+</td>
                 </tr>
             }
         </tbody>
